@@ -21,11 +21,11 @@ const Chat = ({ingredientList}) => {
   
   const hadleChange = (event) => {
     const { value } = event.target;
-    console.log("value==>", value);
+    // console.log("value==>", value);
     setValue(value);
   };
 
-    const sendMessage = async (userMessage) => {
+  const sendMessage = async (userMessage) => {
     setIsMessageLoading(true);
     try {
       const response = await fetch(`${endpoint}/message`, {
@@ -52,9 +52,25 @@ const Chat = ({ingredientList}) => {
       setIsMessageLoading(false);
     }
   };
-  
+
   const hadleSubmit = (event) => {
     event.preventDefault();
+
+    // /message API호출
+    const userMessage = {
+      role: "user",
+      content: value,
+    }
+     console.log("🚀 ~ hadleSubmit ~ userMessage:", userMessage)
+    //messages데이터 업데이트(유저 메시지 추가
+    setMessages((prev) =>[...prev, userMessage])
+
+    // 메시지 입력값 초기화
+    setValue("");
+
+
+    // /massage API호출
+    sendMessage(userMessage);
     //console.log("메시지 보내기");
   };
 
@@ -68,9 +84,9 @@ const Chat = ({ingredientList}) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-        ingredientList: data,
-        messages: [...infoMessages, ...messages],
-      }),
+          ingredientList: data,
+          messages: [...infoMessages, ...messages],
+        }),
       });
 
       // JSON -> 데이터형태인 객체로 변환
