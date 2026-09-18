@@ -1,27 +1,77 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PrevButton from "../components/PrevButton";
 import InfoInput from "../components/InfoInput";
 import AddButton from "../components/AddButton";
 import Button from "../components/Button";
 import { useNavigate } from "react-router-dom";
-import Chat from './Chat';
 
-const Info = () => {
+const Info = ({ sendIngredientList }) => {
   // logic
-  const history = useNavigate()
+  const history = useNavigate();
 
-  // TODO: set함수 추가하기
-  const [ingredientList] = useState([]); // 사용자가 입력할 재료 목록
+  const [ingredientList, setIngredientList] = useState([]); // 사용자가 입력할 재료 목록
 
   const addIngredient = () => {
-    console.log("재료 추가하기");
+    const id = Date.now();
+
+    const newItem = {
+      id,
+      label: `ingredient-${id}`,
+      text: "재료명",
+      value: "",
+    };
+
+    // setIngredientList([...ingredientList, newItem])
+
+    // state값 변경
+    setIngredientList((prev) => [...prev, newItem]);
   };
 
   const handleNext = () => {
-    console.log("chat페이지로 이동");
-    
-    history("/Chat");
+    // 미션: chat페이지로 이동 구현
+    // 입력값이 있는 배열
+    const filterDataList = ingredientList.filter(
+      (item) => item.value.trim() !== "",
+    );
+    //console.log("🚀filterDataList:", filterDataList);
+    if (filterDataList.length) {
+      // 재료 입력값이 있는 경우
+      sendIngredientList(ingredientList);
+      history("/chat");
+      return;
+    }
+
+    // 재료 입력값이 없는 경우
+    alert("재료를 최소 1개이상 입력해주세요");
   };
+
+  const handleRemove = (selectedId) => {
+    // 사용자가 클릭한 요소를 제외한 모든 요소들의 배열
+    const filterIngredientList = ingredientList.filter(
+      (ingredient) => ingredient.id !== selectedId,
+    );
+
+    setIngredientList(filterIngredientList);
+  };
+
+  const handleChange = (data) => {
+    // console.log("🚀 data:", data); // 대상 객체
+    const changeList = ingredientList.map((ingredient) =>
+      ingredient.id === data.id ? data : ingredient,
+    );
+
+    setIngredientList(changeList);
+  };
+
+  const handleSubmit = (event) => {
+    // 폼 제출시 페이지 새로고침 막기
+    event.preventDefault();
+  };
+
+  // state변경 일어나면 실행
+  useEffect(() => {
+    //console.log("ingredientList", ingredientList);
+  }, [ingredientList]);
 
   // view
   return (
@@ -41,11 +91,16 @@ const Info = () => {
 
         {/* START:form 영역 */}
         <div className="mt-20 overflow-auto">
-          <form>
+          <form onSubmit={(event) => handleSubmit(event)}>
             {/* START:input 영역 */}
             <div>
               {ingredientList.map((item) => (
-                <InfoInput key={item.id} content={item} />
+                <InfoInput
+                  key={item.id}
+                  content={item}
+                  onRemove={handleRemove}
+                  onChange={handleChange}
+                />
               ))}
             </div>
             {/* END:input 영역 */}
